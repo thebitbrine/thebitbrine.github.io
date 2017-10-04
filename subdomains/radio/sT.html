@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head >
+  <link href="https://fonts.googleapis.com/css?family=Oswald:200" rel="stylesheet">
+<style>
+	.st {
+  font-style:italic;
+  font-family: 'Oswald', sans-serif;
+	  font-weight: lighter;
+	  font-size: x-large;
+	      text-shadow: 1.5px 1px 3px rgb(255, 0, 217);
+		  
+    color: black;
+}
+</style>
+
+<title>Song Title</title>
+
+</head>
+<body>
+
+<center><h2 class="st" id="txt"></h2></center>
+<script type='text/javascript' src='http://code.jquery.com/jquery-1.11.0.min.js'></script>
+<script type="text/javascript">
+var initalData;
+var finalData;
+
+function loadTheShit(){
+
+$.ajax({
+
+  type:     "GET",
+  url:      "http://146.185.170.243:8000/",
+  dataType: "html",
+  success: function(data){
+  var myStr = data;
+            var subStr = myStr.match("<td>Currently playing:</td><td class=\"streamstats\">(.*)</td>");
+			//document.write("<center>"+subStr[1].replace("&amp;","&")+"</center>");
+			initalData = subStr[1];
+			if(finalData != initalData)
+			{
+			finalData = initalData;
+			
+			document.getElementById("txt").innerHTML = finalData;
+			}
+			}
+		   
+}
+);
+  }
+
+setInterval(loadTheShit,7500);
+  
+</script>
+</body>
+</html>
