@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Loader</title>
-    <!-- Tailwind CSS -->
+    <title>Card Loader</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- DaisyUI -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
+        body {
+            background-color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
         #loadingOverlay {
             position: fixed;
             top: 0;
@@ -35,19 +40,32 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .card {
+            max-width: 90vw;
+            width: auto;
+            min-width: 300px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
     <div id="loadingOverlay">
         <div class="spinner"></div>
     </div>
-    <div id="content"></div>
+    
+    <div class="card">
+        <div id="content" class="card-body"></div>
+    </div>
 
     <script>
         function base64UrlDecode(str) {
-            // Convert URL-safe base64 to regular base64
             str = str.replace(/-/g, '+').replace(/_/g, '/');
-            // Add padding if needed
             while (str.length % 4) {
                 str += '=';
             }
@@ -93,7 +111,7 @@
                 });
             } catch (error) {
                 document.getElementById('content').innerHTML = `
-                    <div class="max-w-2xl mx-auto my-8 p-4 bg-red-100 border border-red-200 rounded-lg text-red-700">
+                    <div class="text-error">
                         <p class="font-bold">Error: ${error.message}</p>
                         <p class="mt-4">Usage:</p>
                         <ul class="list-disc ml-4 mt-2">
@@ -107,7 +125,6 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
 
-        // Load content when page loads
         window.onload = loadContent;
     </script>
 </body>
