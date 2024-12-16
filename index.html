@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced HTML Loader</title>
+    <title>HTML Loader</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- DaisyUI for pre-built components -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.css" rel="stylesheet" type="text/css" />
+    <!-- DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <!-- Alpine.js for simple interactivity -->
+    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Custom styles for loader -->
     <style>
         #loadingOverlay {
             position: fixed;
@@ -34,20 +33,6 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        #debugPanel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -59,154 +44,57 @@
         <div class="spinner"></div>
     </div>
     <div id="content"></div>
-    <div id="debugPanel"></div>
 
     <script>
-        // Utility functions
-        const utils = {
-            log: function(msg, type = 'info') {
-                if (this.debug) {
-                    const panel = document.getElementById('debugPanel');
-                    const time = new Date().toISOString();
-                    panel.innerHTML += `<div style="color: ${type === 'error' ? '#f87171' : '#93c5fd'}">[${time}] ${msg}</div>`;
-                    panel.scrollTop = panel.scrollHeight;
+        // Simple content loader
+        function loadContent() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const b64Content = urlParams.get('b64');
+            const htmlContent = urlParams.get('html');
+            const rawContent = urlParams.get('raw');
+            
+            try {
+                let content = '';
+                if (b64Content) {
+                    content = atob(b64Content);
+                } else if (htmlContent) {
+                    content = decodeURIComponent(htmlContent);
+                } else if (rawContent) {
+                    content = rawContent;
+                } else {
+                    throw new Error('No content provided');
                 }
-                console.log(`[${type.toUpperCase()}]`, msg);
-            },
-            debug: false,
-            safeMode: true,
-            allowScripts: false,
-            resetStyles: false
-        };
 
-        // Content processor
-        const processor = {
-            decodeContent: function(content, encoding) {
-                switch (encoding) {
-                    case 'base64':
-                        return atob(content);
-                    case 'url':
-                        return decodeURIComponent(content);
-                    case 'raw':
-                        return content;
-                    default:
-                        throw new Error('Unsupported encoding type');
-                }
-            },
+                document.getElementById('content').innerHTML = content;
 
-            sanitizeHTML: function(html) {
-                if (!utils.safeMode) return html;
-
-                const doc = new DOMParser().parseFromString(html, 'text/html');
-                
-                if (!utils.allowScripts) {
-                    doc.querySelectorAll('script').forEach(script => script.remove());
-                    doc.querySelectorAll('*').forEach(el => {
-                        for (const attr of el.attributes) {
-                            if (attr.name.toLowerCase().startsWith('on')) {
-                                el.removeAttribute(attr.name);
-                            }
-                        }
+                // Execute any scripts in the content
+                const scripts = document.getElementById('content').getElementsByTagName('script');
+                Array.from(scripts).forEach(script => {
+                    const newScript = document.createElement('script');
+                    Array.from(script.attributes).forEach(attr => {
+                        newScript.setAttribute(attr.name, attr.value);
                     });
-                }
-
-                return doc.body.innerHTML;
-            }
-        };
-
-        // URL parameter handler
-        const params = {
-            get: function(param) {
-                const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get(param);
-            },
-
-            getAll: function() {
-                return {
-                    content: this.get('html') || this.get('b64') || this.get('raw'),
-                    encoding: this.get('html') ? 'url' : (this.get('b64') ? 'base64' : 'raw'),
-                    debug: this.get('debug') === 'true',
-                    safeMode: this.get('safe') !== 'false',
-                    allowScripts: this.get('scripts') === 'true'
-                };
-            }
-        };
-
-        // Main renderer
-        const renderer = {
-            showLoading: function(show = true) {
-                document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
-            },
-
-            showError: function(message) {
+                    newScript.appendChild(document.createTextNode(script.innerHTML));
+                    script.parentNode.replaceChild(newScript, script);
+                });
+            } catch (error) {
                 document.getElementById('content').innerHTML = `
                     <div class="max-w-2xl mx-auto my-8 p-4 bg-red-100 border border-red-200 rounded-lg text-red-700">
-                        <p class="font-bold mb-2">Error: ${message}</p>
-                        <div class="text-sm">
-                            <p class="font-semibold mt-4">Usage:</p>
-                            <ul class="list-disc ml-4 mt-2">
-                                <li>?html=urlencoded_content - For URL encoded HTML</li>
-                                <li>?b64=base64_content - For base64 encoded HTML</li>
-                                <li>?raw=raw_content - For raw HTML content</li>
-                            </ul>
-                            <p class="font-semibold mt-4">Optional parameters:</p>
-                            <ul class="list-disc ml-4 mt-2">
-                                <li>&debug=true - Enable debug panel</li>
-                                <li>&safe=false - Disable safety features</li>
-                                <li>&scripts=true - Allow script execution</li>
-                            </ul>
-                        </div>
+                        <p class="font-bold">Error: ${error.message}</p>
+                        <p class="mt-4">Usage:</p>
+                        <ul class="list-disc ml-4 mt-2">
+                            <li>?html=urlencoded_content</li>
+                            <li>?b64=base64_content</li>
+                            <li>?raw=raw_content</li>
+                        </ul>
                     </div>`;
-            },
-
-            render: async function(config) {
-                try {
-                    if (!config.content) {
-                        throw new Error('No content provided');
-                    }
-
-                    utils.debug = config.debug;
-                    utils.safeMode = config.safeMode;
-                    utils.allowScripts = config.allowScripts;
-
-                    if (utils.debug) {
-                        document.getElementById('debugPanel').style.display = 'block';
-                    }
-
-                    utils.log(`Starting render with encoding: ${config.encoding}`);
-                    utils.log(`Safety features: ${utils.safeMode ? 'enabled' : 'disabled'}`);
-
-                    let html = processor.decodeContent(config.content, config.encoding);
-                    html = processor.sanitizeHTML(html);
-
-                    document.getElementById('content').innerHTML = html;
-
-                    if (utils.allowScripts) {
-                        const scripts = document.getElementById('content').getElementsByTagName('script');
-                        Array.from(scripts).forEach(script => {
-                            const newScript = document.createElement('script');
-                            Array.from(script.attributes).forEach(attr => {
-                                newScript.setAttribute(attr.name, attr.value);
-                            });
-                            newScript.appendChild(document.createTextNode(script.innerHTML));
-                            script.parentNode.replaceChild(newScript, script);
-                        });
-                    }
-
-                    utils.log('Render completed successfully');
-                } catch (error) {
-                    utils.log(error.message, 'error');
-                    this.showError(error.message);
-                } finally {
-                    this.showLoading(false);
-                }
             }
-        };
+            
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
 
-        // Initialize
-        window.onload = function() {
-            renderer.render(params.getAll());
-        };
+        // Load content when page loads
+        window.onload = loadContent;
     </script>
 </body>
 </html>
