@@ -33,10 +33,16 @@
             return urlParams.get(param);
         }
 
-        function decodeAndRender(encodedHtml) {
+        function decodeAndRender(encodedHtml, encoding = 'url') {
             try {
-                // Decode the URL component
-                const decodedHtml = decodeURIComponent(encodedHtml);
+                let decodedHtml;
+                if (encoding === 'base64') {
+                    // Decode base64
+                    decodedHtml = atob(encodedHtml);
+                } else {
+                    // Decode URL encoding
+                    decodedHtml = decodeURIComponent(encodedHtml);
+                }
                 // Set the decoded HTML as the content
                 document.getElementById('content').innerHTML = decodedHtml;
             } catch (error) {
@@ -47,15 +53,21 @@
             }
         }
 
-        // When page loads, check for 'html' parameter
+        // When page loads, check for 'html' or 'b64' parameter
         window.onload = function() {
             const htmlContent = getQueryParam('html');
-            if (htmlContent) {
-                decodeAndRender(htmlContent);
+            const base64Content = getQueryParam('b64');
+            
+            if (base64Content) {
+                decodeAndRender(base64Content, 'base64');
+            } else if (htmlContent) {
+                decodeAndRender(htmlContent, 'url');
             } else {
                 document.getElementById('content').innerHTML = `
                     <div class="error">
-                        No HTML content provided. Add ?html=your_encoded_html to the URL.
+                        No HTML content provided. Use either:
+                        <br>?html=your_url_encoded_html
+                        <br>?b64=your_base64_encoded_html
                     </div>`;
             }
         };
