@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Loader</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        #content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="content"></div>
+
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        function decodeAndRender(encodedHtml) {
+            try {
+                // Decode the URL component
+                const decodedHtml = decodeURIComponent(encodedHtml);
+                // Set the decoded HTML as the content
+                document.getElementById('content').innerHTML = decodedHtml;
+            } catch (error) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        Error loading content: ${error.message}
+                    </div>`;
+            }
+        }
+
+        // When page loads, check for 'html' parameter
+        window.onload = function() {
+            const htmlContent = getQueryParam('html');
+            if (htmlContent) {
+                decodeAndRender(htmlContent);
+            } else {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        No HTML content provided. Add ?html=your_encoded_html to the URL.
+                    </div>`;
+            }
+        };
+    </script>
+</body>
+</html>
